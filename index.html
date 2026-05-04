@@ -40,42 +40,12 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 .hdr-l .sub{font-size:12px;color:var(--text2);margin-top:2px}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
 
-/* Race card */
-.race-card{margin:0 16px 16px;background:var(--run);border-radius:var(--r);padding:16px 18px;color:#fff;position:relative;overflow:hidden}
-.race-card::after{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);pointer-events:none}
-.rf{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;margin-bottom:4px}
-.rn{font-size:16px;font-weight:700}
-.rt{font-size:11px;opacity:.75;margin-top:2px}
-.rrow{display:flex;align-items:baseline;gap:6px;margin-top:12px}
-.rd{font-size:40px;font-weight:700;letter-spacing:-2px;line-height:1}
-.rdl{font-size:12px;opacity:.8}
-
-/* Stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
-.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px}
-.sc-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.sc-v{font-size:22px;font-weight:700;letter-spacing:-1px}
-.sc-s{font-size:10px;color:var(--text3);margin-top:2px}
-
-/* Progress */
-.prog{padding:0 16px 20px}
-.prog-top{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:6px}
-.prog-bg{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
-.prog-fill{height:100%;background:var(--run);border-radius:2px;transition:width .4s}
-
-/* Section label */
-.sec{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:0 16px 10px}
-
-/* Week tabs */
-.wtabs{display:flex;gap:6px;padding:0 16px 14px;overflow-x:auto;scrollbar-width:none}
-.wtabs::-webkit-scrollbar{display:none}
-.wtab{flex:0 0 auto;padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Roboto',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.wtab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-/* Focus strip */
-.focus{margin:0 16px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
-.fk{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
-.ft{font-size:12px;color:var(--text2);line-height:1.5}
+/* Week banner */
+.week-banner{margin:0 16px 16px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between}
+.wb-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.wb-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.wb-dates{font-size:11px;color:var(--text2);margin-top:2px}
+.wb-pill{background:var(--run);color:#fff;border-radius:100px;padding:5px 12px;font-size:12px;font-weight:600}
 
 /* Two-column schedule */
 .sched{padding:0 16px;display:grid;grid-template-columns:70px 1fr;gap:0}
@@ -183,24 +153,14 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
     <div class="avatar">ASK</div>
   </div>
 
-  <div class="race-card">
-    <div class="rf">🏁 Race target</div>
-    <div class="rn">Battersea Half Marathon</div>
-    <div class="rt">30 May 2025 · Sub 1:45:00</div>
-    <div class="rrow">
-      <div class="rd" id="countdown">--</div>
-      <div class="rdl" id="countdown-lbl">days to go</div>
+  <div class="week-banner">
+    <div>
+      <div class="wb-label">Current week</div>
+      <div class="wb-title" id="wb-title">Week 1</div>
+      <div class="wb-dates" id="wb-dates">Loading...</div>
     </div>
+    <div class="wb-pill" id="wb-pill">Wk 1 / 4</div>
   </div>
-
-  <div class="prog">
-    <div class="prog-top"><span>Plan progress</span><span id="prog-lbl">0%</span></div>
-    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-  </div>
-
-  <div class="sec">Schedule</div>
-  <div class="wtabs" id="week-tabs"></div>
-  <div class="focus"><div class="fk">Week focus</div><div class="ft" id="focus-text"></div></div>
 
   <div class="sched">
     <div class="day-col" id="day-col"></div>
@@ -287,6 +247,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
   <div class="ncard"><div class="ntitle">Race week (Week 4)</div>
     <div class="nrow"><span class="nk">Thu–Fri carbs</span><span class="nv">+100–120 g</span></div>
     <div class="nrow"><span class="nk">Sodium</span><span class="nv">Slightly increase</span></div>
+    <div class="nrow"><span class="nk">Alcohol</span><span class="nv">Zero</span></div>
     <div class="nrow"><span class="nk">Race morning</span><span class="nv">3h before, no surprises</span></div>
   </div>
   <div style="height:20px"></div>
@@ -387,18 +348,34 @@ try{const b=localStorage.getItem("ahmedtrains_body");if(b)bodyLogs=JSON.parse(b)
 function saveBody(){try{localStorage.setItem("ahmedtrains_body",JSON.stringify(bodyLogs));}catch(e){}}
 
 // ─────────────────────────────────────────────
-// COUNTDOWN — local date math (no timezone issues)
+// AUTO WEEK DETECTION — resets every Monday
+// Plan starts: 5 May 2025 (Monday of Week 1)
 // ─────────────────────────────────────────────
-function setCountdown(){
-  const now=new Date();
-  const race=new Date(2025,4,30); // month is 0-indexed; 4 = May
-  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  const diff=Math.round((race-today)/(86400000));
-  const el=document.getElementById("countdown");
-  const lb=document.getElementById("countdown-lbl");
-  if(diff>0){el.textContent=diff;lb.textContent="days to go";}
-  else if(diff===0){el.textContent="TODAY";lb.textContent="Race day! 🏅";}
-  else{el.textContent=Math.abs(diff);lb.textContent="days after race";}
+const PLAN_START = new Date(2025, 4, 5); // May 5 2025
+
+function getCurrentWeek(){
+  const today = new Date();
+  const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.floor((todayMid - PLAN_START) / 86400000);
+  if(diffDays < 0) return 0;           // before plan starts → show week 1
+  const week = Math.floor(diffDays / 7);
+  return Math.min(week, 3);            // cap at week 4 (index 3)
+}
+
+function getWeekDates(weekIdx){
+  const mon = new Date(PLAN_START);
+  mon.setDate(mon.getDate() + weekIdx * 7);
+  const sun = new Date(mon);
+  sun.setDate(sun.getDate() + 6);
+  const fmt = d => d.toLocaleDateString("en-GB", {day:"numeric", month:"short"});
+  return fmt(mon) + " – " + fmt(sun);
+}
+
+function renderWeekBanner(){
+  const wk = S.activeWeek;
+  document.getElementById("wb-title").textContent = "Week " + (wk+1);
+  document.getElementById("wb-dates").textContent = getWeekDates(wk);
+  document.getElementById("wb-pill").textContent = "Wk " + (wk+1) + " / 4";
 }
 
 // ─────────────────────────────────────────────
@@ -413,39 +390,18 @@ function setGreeting(){
 }
 
 // ─────────────────────────────────────────────
-// STATS
+// STATS — simplified (cards removed)
 // ─────────────────────────────────────────────
 function updateStats(){
-  let total=0,wkDone=0;
-  for(let w=0;w<4;w++)for(let d=0;d<7;d++){
-    if(S.done[w+"-"+d])total++;
-    if(w===S.activeWeek&&S.done[w+"-"+d])wkDone++;
-  }
-  document.getElementById("stat-done").textContent=total;
-  document.getElementById("stat-week").textContent=Math.round(wkDone/7*100)+"%";
-  document.getElementById("stat-wsub").textContent=wkDone+"/7";
-  const op=Math.round(total/28*100);
-  document.getElementById("prog-lbl").textContent=op+"%";
-  document.getElementById("prog-fill").style.width=op+"%";
-  if(bodyLogs.length){
-    const s=[...bodyLogs].sort((a,b)=>b.week-a.week);
-    document.getElementById("stat-wt").textContent=s[0].weight??("--");
-  }
+  // No stat cards on home screen anymore — kept for log screen compatibility
 }
 
 // ─────────────────────────────────────────────
-// WEEK TABS
+// WEEK TABS — replaced by auto-detection
 // ─────────────────────────────────────────────
 function renderTabs(){
-  const el=document.getElementById("week-tabs");
-  el.innerHTML="";
-  WEEKS.forEach((w,i)=>{
-    const b=document.createElement("button");
-    b.className="wtab"+(i===S.activeWeek?" active":"");
-    b.textContent=w.label;
-    b.onclick=()=>{S.activeWeek=i;save();renderTabs();renderSched();updateStats();};
-    el.appendChild(b);
-  });
+  // activeWeek is set automatically from current date on load
+  renderWeekBanner();
 }
 
 // ─────────────────────────────────────────────
@@ -462,7 +418,6 @@ function getOrder(){
 // ─────────────────────────────────────────────
 function renderSched(){
   const wk=WEEKS[S.activeWeek];
-  document.getElementById("focus-text").textContent=wk.focus;
   const order=getOrder();
   const dcol=document.getElementById("day-col");
   const wcol=document.getElementById("wkcol");
@@ -746,14 +701,25 @@ function renderBodyScreen(){
 }
 
 // ─────────────────────────────────────────────
-// INIT
+// INIT — auto-detect current week on load
 // ─────────────────────────────────────────────
+S.activeWeek = getCurrentWeek();
 setGreeting();
-setCountdown();
-renderTabs();
+renderWeekBanner();
 renderSched();
-updateStats();
 renderLog();
+
+// Reset check-ins every Monday at midnight
+(function checkWeekReset(){
+  const stored = localStorage.getItem("ahmedtrains_lastWeek");
+  const curWeek = getCurrentWeek();
+  if(stored !== null && parseInt(stored) !== curWeek){
+    // Week has advanced — wipe done state for the new week
+    for(let d=0;d<7;d++) delete S.done[curWeek+"-"+d];
+    save();
+  }
+  localStorage.setItem("ahmedtrains_lastWeek", curWeek);
+})();
 </script>
 <script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js");}</script>
 </body>
