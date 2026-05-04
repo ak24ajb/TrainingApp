@@ -42,10 +42,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 
 /* Week banner */
 .week-banner{margin:0 16px 16px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between}
-.wb-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
-.wb-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
-.wb-dates{font-size:11px;color:var(--text2);margin-top:2px}
-.wb-pill{background:var(--run);color:#fff;border-radius:100px;padding:5px 12px;font-size:12px;font-weight:600}
+
 
 /* Two-column schedule */
 .sched{padding:0 16px;display:grid;grid-template-columns:70px 1fr;gap:0}
@@ -138,6 +135,18 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 .nbtn.active{color:var(--run)}
 .nbtn svg{width:22px;height:22px}
 .nlbl{font-size:9px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+
+/* Workout screen */
+.wk-tabs{display:flex;gap:0;padding:0 16px 16px}
+.wk-tab{flex:1;padding:9px 0;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Roboto',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.wk-tab:first-child{border-radius:10px 0 0 10px}
+.wk-tab:last-child{border-radius:0 10px 10px 0;border-left:none}
+.wk-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mu-section{padding:0 16px 4px}
+.mu-group-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:10px 0 6px}
+.mu-card{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:6px}
+.mu-ex{font-size:14px;font-weight:500;color:var(--text)}
+.mu-sets{font-size:12px;color:var(--text3);font-weight:400;white-space:nowrap;margin-left:8px}
 </style>
 </head>
 <body>
@@ -149,18 +158,6 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
     <div class="day-col" id="day-col"></div>
     <div class="wkcol" id="wkcol"></div>
   </div>
-  <div style="height:20px"></div>
-</div>
-
-<!-- LOG -->
-<div class="screen" id="screen-log">
-  <div class="hdr">
-    <div class="hdr-l">
-      <div class="title">Session log</div>
-      <div class="sub" id="log-sub">Completed sessions</div>
-    </div>
-  </div>
-  <div class="llist" id="log-list"></div>
   <div style="height:20px"></div>
 </div>
 
@@ -211,28 +208,73 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
   <div style="height:20px"></div>
 </div>
 
-<!-- NUTRITION -->
-<div class="screen" id="screen-nutrition">
-  <div class="hdr"><div class="hdr-l"><div class="title">Nutrition</div><div class="sub">Targets for your cut phase</div></div></div>
-  <div class="ncard"><div class="ntitle">Daily targets</div>
-    <div class="nrow"><span class="nk">Calories</span><span class="nv">~2,100 kcal</span></div>
-    <div class="nrow"><span class="nk">Protein</span><span class="nv">170–190 g</span></div>
-    <div class="nrow"><span class="nk">Carbs</span><span class="nv">180–220 g</span></div>
-    <div class="nrow"><span class="nk">Fats</span><span class="nv">50–65 g</span></div>
-    <div class="nrow"><span class="nk">Deficit</span><span class="nv">300–400 kcal</span></div>
-    <div class="nrow"><span class="nk">Water</span><span class="nv">3.5–4 L</span></div>
+<!-- WORKOUTS -->
+<div class="screen" id="screen-workouts">
+  <div class="hdr" style="padding-top:calc(var(--safe-top) + 18px)">
+    <div class="hdr-l"><div class="title">Workouts</div><div class="sub">Your lifting programmes</div></div>
   </div>
-  <div class="ncard"><div class="ntitle">Run day adjustments</div>
-    <div class="nrow"><span class="nk">Extra carbs</span><span class="nv">+50–80 g</span></div>
-    <div class="nrow"><span class="nk">Long run pre-fuel</span><span class="nv">Oats + banana</span></div>
-    <div class="nrow"><span class="nk">Post-run protein</span><span class="nv">Within 30 min</span></div>
+
+  <!-- Tabs -->
+  <div class="wk-tabs">
+    <button class="wk-tab active" id="wktab-a" onclick="switchWorkout('a')">Full Body A</button>
+    <button class="wk-tab" id="wktab-b" onclick="switchWorkout('b')">Full Body B</button>
   </div>
-  <div class="ncard"><div class="ntitle">Race week (Week 4)</div>
-    <div class="nrow"><span class="nk">Thu–Fri carbs</span><span class="nv">+100–120 g</span></div>
-    <div class="nrow"><span class="nk">Sodium</span><span class="nv">Slightly increase</span></div>
-    <div class="nrow"><span class="nk">Alcohol</span><span class="nv">Zero</span></div>
-    <div class="nrow"><span class="nk">Race morning</span><span class="nv">3h before, no surprises</span></div>
+
+  <!-- Full Body A -->
+  <div id="wk-a">
+    <div class="mu-section">
+      <div class="mu-group-label">🫁 Chest</div>
+      <div class="mu-card"><div class="mu-ex">Flat Bench Press</div><div class="mu-sets">4 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Pec Flye</div><div class="mu-sets">2 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">🔙 Back</div>
+      <div class="mu-card"><div class="mu-ex">Lat Pulldowns</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Rows</div><div class="mu-sets">4 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">💪 Delts</div>
+      <div class="mu-card"><div class="mu-ex">Side Lateral Raises</div><div class="mu-sets">4 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">🦵 Legs</div>
+      <div class="mu-card"><div class="mu-ex">Squats</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Glutes</div><div class="mu-sets">3 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">💪 Arms</div>
+      <div class="mu-card"><div class="mu-ex">Incline Bench Curls</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Tricep Dips</div><div class="mu-sets">3 sets</div></div>
+    </div>
   </div>
+
+  <!-- Full Body B -->
+  <div id="wk-b" style="display:none">
+    <div class="mu-section">
+      <div class="mu-group-label">🫁 Chest</div>
+      <div class="mu-card"><div class="mu-ex">Incline Bench Press</div><div class="mu-sets">4 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Pec Flye</div><div class="mu-sets">2 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">🔙 Back</div>
+      <div class="mu-card"><div class="mu-ex">Deadlifts</div><div class="mu-sets">4 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Face Pulls</div><div class="mu-sets">3 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">💪 Delts</div>
+      <div class="mu-card"><div class="mu-ex">Shoulder Press</div><div class="mu-sets">4 sets</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">🦵 Legs</div>
+      <div class="mu-card"><div class="mu-ex">Single Leg RDLs</div><div class="mu-sets">—</div></div>
+    </div>
+    <div class="mu-section">
+      <div class="mu-group-label">💪 Arms</div>
+      <div class="mu-card"><div class="mu-ex">Preacher Curls</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card"><div class="mu-ex">Rope Extensions</div><div class="mu-sets">3 sets</div></div>
+    </div>
+  </div>
+
   <div style="height:20px"></div>
 </div>
 
@@ -253,17 +295,14 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
     <span class="nlbl">Home</span>
   </button>
-  <button class="nbtn" id="nav-log" onclick="go('log')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    <span class="nlbl">Log</span>
-  </button>
+
   <button class="nbtn" id="nav-body" onclick="go('body')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v6M9 22l1.5-5M15 22l-1.5-5M9 12l-3 4h12l-3-4"/></svg>
     <span class="nlbl">Body</span>
   </button>
-  <button class="nbtn" id="nav-nutrition" onclick="go('nutrition')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-    <span class="nlbl">Nutrition</span>
+  <button class="nbtn" id="nav-workouts" onclick="go('workouts')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h2M20 8h2M4 8h16"/><path d="M4 6v4M20 6v4"/><path d="M1 7v2M23 7v2"/></svg>
+    <span class="nlbl">Workouts</span>
   </button>
 </div>
 
@@ -354,23 +393,12 @@ function getWeekDates(weekIdx){
   return fmt(mon) + " – " + fmt(sun);
 }
 
-function renderWeekBanner(){
-  const wk = S.activeWeek;
-  document.getElementById("wb-title").textContent = "Week " + (wk+1);
-  document.getElementById("wb-dates").textContent = getWeekDates(wk);
-  document.getElementById("wb-pill").textContent = "Wk " + (wk+1) + " / 4";
-}
+
 
 // ─────────────────────────────────────────────
 // GREETING
 // ─────────────────────────────────────────────
-function setGreeting(){
-  const h=new Date().getHours();
-  const g=h<5?"Late night, Ahmed":h<12?"Good morning, Ahmed":h<17?"Good afternoon, Ahmed":"Good evening, Ahmed";
-  document.getElementById("greeting").textContent=g;
-  const m=["Long run day. Slow and steady.","Full body A. Let's go.","Easy run on the plan.","Hyrox day. Embrace the grind.","Rest day. Recovery is training.","Full body B. Log every rep.","Tempo run. Push the pace."];
-  document.getElementById("greeting-sub").textContent=m[new Date().getDay()]||"Stay consistent.";
-}
+
 
 // ─────────────────────────────────────────────
 // STATS — simplified (cards removed)
@@ -383,8 +411,7 @@ function updateStats(){
 // WEEK TABS — replaced by auto-detection
 // ─────────────────────────────────────────────
 function renderTabs(){
-  // activeWeek is set automatically from current date on load
-  renderWeekBanner();
+  // activeWeek set automatically from current date on load
 }
 
 // ─────────────────────────────────────────────
@@ -453,8 +480,6 @@ function toggleDone(e,btn){
   const k=btn.dataset.w+"-"+btn.dataset.d;
   if(S.done[k])delete S.done[k];else S.done[k]=true;
   save();renderSched();updateStats();
-  // Update log if visible
-  if(document.getElementById("screen-log").classList.contains("active"))renderLog();
 }
 
 // ─────────────────────────────────────────────
@@ -529,36 +554,6 @@ function closeSheet(){
   document.getElementById("overlay").classList.remove("on");
 }
 
-// ─────────────────────────────────────────────
-// LOG SCREEN — now correctly reads S.done
-// ─────────────────────────────────────────────
-function renderLog(){
-  const list=document.getElementById("log-list");
-  const entries=[];
-  for(let w=0;w<4;w++){
-    const order=S.order["w"+w]||[0,1,2,3,4,5,6];
-    WEEKS[w].days.forEach((d,di)=>{
-      if(S.done[w+"-"+di]){
-        const slot=order.indexOf(di);
-        const dayName=slot>=0?DAYS_FULL[slot]:DAYS_FULL[di];
-        entries.push({week:w+1,day:dayName,title:d.title,type:d.type});
-      }
-    });
-  }
-  document.getElementById("log-sub").textContent=entries.length+" sessions completed";
-  if(!entries.length){
-    list.innerHTML="<div class='empty'>No sessions logged yet.<br>Tick the circle on any session<br>to mark it done.</div>";
-    return;
-  }
-  list.innerHTML=entries.map(e=>`
-    <div class="lentry">
-      <div class="licon">${EMJ[e.type]||"🌙"}</div>
-      <div class="linfo">
-        <div class="lt">${e.title}</div>
-        <div class="lm">Week ${e.week} · ${e.day} · ${BL[e.type]}</div>
-      </div>
-    </div>`).join("");
-}
 
 // ─────────────────────────────────────────────
 // SCREEN NAV
@@ -568,7 +563,6 @@ function go(name){
   document.querySelectorAll(".nbtn").forEach(b=>b.classList.remove("active"));
   document.getElementById("screen-"+name).classList.add("active");
   document.getElementById("nav-"+name).classList.add("active");
-  if(name==="log")renderLog();
   if(name==="body")renderBodyScreen();
 }
 
@@ -684,20 +678,26 @@ function renderBodyScreen(){
 }
 
 // ─────────────────────────────────────────────
+// WORKOUT TAB SWITCHER
+// ─────────────────────────────────────────────
+function switchWorkout(tab){
+  document.getElementById("wk-a").style.display = tab==="a" ? "block" : "none";
+  document.getElementById("wk-b").style.display = tab==="b" ? "block" : "none";
+  document.querySelectorAll(".wk-tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("wktab-"+tab).classList.add("active");
+}
+
+// ─────────────────────────────────────────────
 // INIT — auto-detect current week on load
 // ─────────────────────────────────────────────
 S.activeWeek = getCurrentWeek();
-setGreeting();
-renderWeekBanner();
 renderSched();
-renderLog();
 
-// Reset check-ins every Monday at midnight
+// Reset check-ins every Monday
 (function checkWeekReset(){
   const stored = localStorage.getItem("ahmedtrains_lastWeek");
   const curWeek = getCurrentWeek();
   if(stored !== null && parseInt(stored) !== curWeek){
-    // Week has advanced — wipe done state for the new week
     for(let d=0;d<7;d++) delete S.done[curWeek+"-"+d];
     save();
   }
