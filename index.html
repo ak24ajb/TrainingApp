@@ -49,11 +49,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 .day-col{display:flex;flex-direction:column;gap:8px}
 .dlc{height:68px;display:flex;flex-direction:column;justify-content:center;padding-right:8px}
 .dln{font-size:12px;font-weight:600;color:var(--text)}
-.dls{font-size:10px;color:var(--text3);margin-top:1px}
 .wkcol{display:flex;flex-direction:column;gap:8px}
 
 /* Workout card */
-.wcard{height:68px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:0 10px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;touch-action:none;transition:box-shadow .15s,border-color .15s;position:relative}
+.wcard{height:68px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:0 10px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:box-shadow .15s,border-color .15s;position:relative}
 .wcard.dragging{opacity:.35;box-shadow:none}
 .wcard.drag-over{border:2px dashed var(--run);background:var(--run-bg)}
 .wi{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
@@ -65,8 +64,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 .cbtn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .cbtn.chk{background:var(--lift);border-color:var(--lift)}
 .cbtn svg{display:none}.cbtn.chk svg{display:block}
-.dhandle{display:flex;flex-direction:column;gap:3px;padding:4px;opacity:.25;flex-shrink:0}
-.dhandle span{display:block;width:13px;height:1.5px;background:var(--text);border-radius:2px}
+.dhandle{display:flex;flex-direction:column;gap:3px;padding:8px 6px;opacity:.3;flex-shrink:0;cursor:grab;touch-action:none}
+.dhandle:active{cursor:grabbing;opacity:.6}
+.dhandle span{display:block;width:14px;height:2px;background:var(--text);border-radius:2px}
 
 /* Sheet */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:199;display:none}
@@ -144,9 +144,20 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 .wk-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .mu-section{padding:0 16px 4px}
 .mu-group-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:10px 0 6px}
-.mu-card{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:6px}
+.mu-card{padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
+.mu-card:active{border-color:var(--border2)}
+.mu-card-top{display:flex;align-items:center;justify-content:space-between}
 .mu-ex{font-size:14px;font-weight:500;color:var(--text)}
-.mu-sets{font-size:12px;color:var(--text3);font-weight:400;white-space:nowrap;margin-left:8px}
+.mu-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mu-6rm{font-size:11px;font-weight:600;color:var(--run);background:var(--run-bg);padding:2px 7px;border-radius:100px;white-space:nowrap}
+.mu-sets{font-size:12px;color:var(--text3);font-weight:400;white-space:nowrap}
+.mu-6rm-row{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);align-items:center;gap:8px}
+.mu-card.open .mu-6rm-row{display:flex}
+.mu-6rm-inp{flex:1;background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'Roboto',sans-serif;font-size:14px;font-weight:500;color:var(--text);outline:none;-webkit-appearance:none}
+.mu-6rm-inp:focus{border-color:var(--run)}
+.mu-6rm-inp::placeholder{color:var(--text3)}
+.mu-6rm-lbl{font-size:11px;color:var(--text3);white-space:nowrap}
+.mu-save-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:'Roboto',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -224,27 +235,54 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
   <div id="wk-a">
     <div class="mu-section">
       <div class="mu-group-label">🫁 Chest</div>
-      <div class="mu-card"><div class="mu-ex">Flat Bench Press</div><div class="mu-sets">4 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Pec Flye</div><div class="mu-sets">2 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'a-flat-bench')">
+        <div class="mu-card-top"><div class="mu-ex">Flat Bench Press</div><div class="mu-right"><span class="mu-6rm" id="rm-a-flat-bench" style="display:none"></span><span class="mu-sets">4 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-flat-bench" placeholder="e.g. 80" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-flat-bench')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'a-pec-flye')">
+        <div class="mu-card-top"><div class="mu-ex">Pec Flye</div><div class="mu-right"><span class="mu-6rm" id="rm-a-pec-flye" style="display:none"></span><span class="mu-sets">2 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-pec-flye" placeholder="e.g. 40" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-pec-flye')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">🔙 Back</div>
-      <div class="mu-card"><div class="mu-ex">Lat Pulldowns</div><div class="mu-sets">3 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Rows</div><div class="mu-sets">4 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'a-lat-pull')">
+        <div class="mu-card-top"><div class="mu-ex">Lat Pulldowns</div><div class="mu-right"><span class="mu-6rm" id="rm-a-lat-pull" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-lat-pull" placeholder="e.g. 65" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-lat-pull')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'a-rows')">
+        <div class="mu-card-top"><div class="mu-ex">Rows</div><div class="mu-right"><span class="mu-6rm" id="rm-a-rows" style="display:none"></span><span class="mu-sets">4 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-rows" placeholder="e.g. 70" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-rows')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">💪 Delts</div>
-      <div class="mu-card"><div class="mu-ex">Side Lateral Raises</div><div class="mu-sets">4 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'a-laterals')">
+        <div class="mu-card-top"><div class="mu-ex">Side Lateral Raises</div><div class="mu-right"><span class="mu-6rm" id="rm-a-laterals" style="display:none"></span><span class="mu-sets">4 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-laterals" placeholder="e.g. 12" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-laterals')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">🦵 Legs</div>
-      <div class="mu-card"><div class="mu-ex">Squats</div><div class="mu-sets">3 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Glutes</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'a-squats')">
+        <div class="mu-card-top"><div class="mu-ex">Squats</div><div class="mu-right"><span class="mu-6rm" id="rm-a-squats" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-squats" placeholder="e.g. 100" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-squats')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'a-glutes')">
+        <div class="mu-card-top"><div class="mu-ex">Glutes</div><div class="mu-right"><span class="mu-6rm" id="rm-a-glutes" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-glutes" placeholder="e.g. 50" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-glutes')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">💪 Arms</div>
-      <div class="mu-card"><div class="mu-ex">Incline Bench Curls</div><div class="mu-sets">3 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Tricep Dips</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'a-inc-curls')">
+        <div class="mu-card-top"><div class="mu-ex">Incline Bench Curls</div><div class="mu-right"><span class="mu-6rm" id="rm-a-inc-curls" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-inc-curls" placeholder="e.g. 14" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-inc-curls')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'a-tri-dips')">
+        <div class="mu-card-top"><div class="mu-ex">Tricep Dips</div><div class="mu-right"><span class="mu-6rm" id="rm-a-tri-dips" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-a-tri-dips" placeholder="e.g. BW+10" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'a-tri-dips')">Save</button></div>
+      </div>
     </div>
   </div>
 
@@ -252,26 +290,50 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
   <div id="wk-b" style="display:none">
     <div class="mu-section">
       <div class="mu-group-label">🫁 Chest</div>
-      <div class="mu-card"><div class="mu-ex">Incline Bench Press</div><div class="mu-sets">4 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Pec Flye</div><div class="mu-sets">2 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'b-inc-bench')">
+        <div class="mu-card-top"><div class="mu-ex">Incline Bench Press</div><div class="mu-right"><span class="mu-6rm" id="rm-b-inc-bench" style="display:none"></span><span class="mu-sets">4 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-inc-bench" placeholder="e.g. 70" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-inc-bench')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'b-pec-flye')">
+        <div class="mu-card-top"><div class="mu-ex">Pec Flye</div><div class="mu-right"><span class="mu-6rm" id="rm-b-pec-flye" style="display:none"></span><span class="mu-sets">2 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-pec-flye" placeholder="e.g. 40" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-pec-flye')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">🔙 Back</div>
-      <div class="mu-card"><div class="mu-ex">Deadlifts</div><div class="mu-sets">4 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Face Pulls</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'b-deadlifts')">
+        <div class="mu-card-top"><div class="mu-ex">Deadlifts</div><div class="mu-right"><span class="mu-6rm" id="rm-b-deadlifts" style="display:none"></span><span class="mu-sets">4 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-deadlifts" placeholder="e.g. 140" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-deadlifts')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'b-face-pulls')">
+        <div class="mu-card-top"><div class="mu-ex">Face Pulls</div><div class="mu-right"><span class="mu-6rm" id="rm-b-face-pulls" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-face-pulls" placeholder="e.g. 25" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-face-pulls')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">💪 Delts</div>
-      <div class="mu-card"><div class="mu-ex">Shoulder Press</div><div class="mu-sets">4 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'b-shpress')">
+        <div class="mu-card-top"><div class="mu-ex">Shoulder Press</div><div class="mu-right"><span class="mu-6rm" id="rm-b-shpress" style="display:none"></span><span class="mu-sets">4 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-shpress" placeholder="e.g. 50" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-shpress')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">🦵 Legs</div>
-      <div class="mu-card"><div class="mu-ex">Single Leg RDLs</div><div class="mu-sets">—</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'b-slrdl')">
+        <div class="mu-card-top"><div class="mu-ex">Single Leg RDLs</div><div class="mu-right"><span class="mu-6rm" id="rm-b-slrdl" style="display:none"></span><span class="mu-sets">—</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-slrdl" placeholder="e.g. 30" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-slrdl')">Save</button></div>
+      </div>
     </div>
     <div class="mu-section">
       <div class="mu-group-label">💪 Arms</div>
-      <div class="mu-card"><div class="mu-ex">Preacher Curls</div><div class="mu-sets">3 sets</div></div>
-      <div class="mu-card"><div class="mu-ex">Rope Extensions</div><div class="mu-sets">3 sets</div></div>
+      <div class="mu-card" onclick="toggleEx(this,'b-preacher')">
+        <div class="mu-card-top"><div class="mu-ex">Preacher Curls</div><div class="mu-right"><span class="mu-6rm" id="rm-b-preacher" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-preacher" placeholder="e.g. 30" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-preacher')">Save</button></div>
+      </div>
+      <div class="mu-card" onclick="toggleEx(this,'b-rope-ext')">
+        <div class="mu-card-top"><div class="mu-ex">Rope Extensions</div><div class="mu-right"><span class="mu-6rm" id="rm-b-rope-ext" style="display:none"></span><span class="mu-sets">3 sets</span></div></div>
+        <div class="mu-6rm-row"><span class="mu-6rm-lbl">6RM (kg)</span><input class="mu-6rm-inp" type="number" id="inp-b-rope-ext" placeholder="e.g. 22" min="0" max="500" inputmode="decimal" onclick="event.stopPropagation()"><button class="mu-save-btn" onclick="saveRM(event,'b-rope-ext')">Save</button></div>
+      </div>
     </div>
   </div>
 
@@ -307,203 +369,130 @@ html,body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────
-const WEEKS=[
-  {label:"Wk 1",focus:"Deload return — 65–70% 1RM. Prioritise form and sleep over intensity.",days:[
-    {name:"Monday",    type:"lift",  title:"Full body A",           detail:"Squat, bench, row, OHP, RDL — 3×8 @ 65–70% 1RM. Mind-muscle connection. Welcome back."},
-    {name:"Tuesday",   type:"run",   title:"Easy run",              detail:"Garmin coach session. Zone 2 aerobic effort only. No heroics today."},
-    {name:"Wednesday", type:"hyrox", title:"Hyrox conditioning",    detail:"Row 1000m + 4 rounds: 20 wall balls · 20 burpees · 20 KB swings. Moderate pace."},
-    {name:"Thursday",  type:"rest",  title:"Complete rest",         detail:"Sleep 8h. Eat your protein. Foam roll. This is part of the plan."},
-    {name:"Friday",    type:"lift",  title:"Full body B",           detail:"Deadlift, incline press, pull-ups, lunges, face pulls — 3×8 @ 65–70% 1RM."},
-    {name:"Saturday",  type:"run",   title:"Tempo run",             detail:"Garmin coach session. Steady tempo effort. Keep form tight."},
-    {name:"Sunday",    type:"run",   title:"Long run",              detail:"Garmin coach session. Slow conversational pace. Aerobic base building."}
-  ]},
-  {label:"Wk 2",focus:"Intensity ramp — 75–80% 1RM. Start 300–400 kcal deficit. Protein to 2.2g/kg.",days:[
-    {name:"Monday",    type:"lift",  title:"Full body A",           detail:"Squat, bench, row, OHP, RDL — 4×6 @ 75–80% 1RM. One extra set vs Week 1."},
-    {name:"Tuesday",   type:"run",   title:"Easy run",              detail:"Garmin coach session. Zone 2. Legs recovering from Monday."},
-    {name:"Wednesday", type:"hyrox", title:"Hyrox conditioning",    detail:"Ski erg 1000m + 5 rounds: 20 wall balls · 20 box step-overs · 200m farmers carry."},
-    {name:"Thursday",  type:"rest",  title:"Complete rest",         detail:"Active recovery optional: 20-min walk, foam roll, mobility work."},
-    {name:"Friday",    type:"lift",  title:"Full body B",           detail:"Deadlift, incline press, pull-ups, lunges, face pulls — 4×6 @ 75–80% 1RM."},
-    {name:"Saturday",  type:"run",   title:"Tempo run",             detail:"Garmin coach session. Push into comfortably hard zone."},
-    {name:"Sunday",    type:"run",   title:"Long run",              detail:"Garmin coach session. Easy and steady. Hydrate well."}
-  ]},
-  {label:"Wk 3",focus:"Peak effort — 80–85% 1RM. Log every weight. Deficit maintained.",days:[
-    {name:"Monday",    type:"lift",  title:"Full body A",           detail:"Squat, bench, row, OHP, RDL — 4×5 @ 80–85% 1RM. Log every weight."},
-    {name:"Tuesday",   type:"run",   title:"Easy run",              detail:"Garmin coach session. Zone 2 recovery run after heavy Monday."},
-    {name:"Wednesday", type:"hyrox", title:"Hyrox conditioning",    detail:"Row 2000m + AMRAP 15min: 15 wall balls · 15 burpee broad jumps · 15 KB snatches each side."},
-    {name:"Thursday",  type:"rest",  title:"Complete rest",         detail:"Rest is where you get stronger. 7–9h sleep. No exceptions."},
-    {name:"Friday",    type:"lift",  title:"Full body B",           detail:"Deadlift, incline press, pull-ups, Bulgarian split squat, face pulls — 4×5 @ 80–85% 1RM."},
-    {name:"Saturday",  type:"run",   title:"Tempo run",             detail:"Garmin coach session. Race-effort intervals. Dig deep."},
-    {name:"Sunday",    type:"run",   title:"Long run",              detail:"Garmin coach session. Longest run of this block. Fuel properly."}
-  ]},
-  {label:"Wk 4",focus:"Taper — cut volume 30%, keep intensity. Arrive at Battersea fresh and sharp.",days:[
-    {name:"Monday",    type:"lift",  title:"Full body A (taper)",   detail:"Squat, bench, row — 3×4 @ same load as Week 3. Maintain stimulus only."},
-    {name:"Tuesday",   type:"run",   title:"Easy run",              detail:"Garmin coach taper session. Short and easy. Just move."},
-    {name:"Wednesday", type:"hyrox", title:"Light conditioning",    detail:"30 min max: Row 500m · 3 rounds 10 wall balls + 10 KB swings. HR low."},
-    {name:"Thursday",  type:"rest",  title:"Complete rest",         detail:"Extra sleep. Begin carb-loading gently today. Sodium slightly up."},
-    {name:"Friday",    type:"lift",  title:"Full body B (taper)",   detail:"Deadlift, pull-ups, lunges — 2×4 @ same load. Short, sharp, done."},
-    {name:"Saturday",  type:"run",   title:"Shakeout run",          detail:"15–20 min easy + a few strides. Trust the taper. You are ready."},
-    {name:"Sunday",    type:"race",  title:"Battersea Half Marathon",detail:"Sub-1:45 attempt. 30 May 2025. Bismillah — trust Allah and run."}
-  ]}
+// ── Weekly schedule (single repeating week) ──
+const WEEK = [
+  {name:"Monday",    type:"lift",  title:"Full body A",           detail:"Squat, bench, row, OHP, RDL — progressive overload. Log every weight."},
+  {name:"Tuesday",   type:"run",   title:"Easy run",              detail:"Garmin coach session. Zone 2 aerobic effort. Keep it easy."},
+  {name:"Wednesday", type:"hyrox", title:"Hyrox conditioning",    detail:"Row 1000m + 4 rounds: 20 wall balls · 20 burpees · 20 KB swings."},
+  {name:"Thursday",  type:"rest",  title:"Complete rest",         detail:"Sleep 8h. Eat your protein. Foam roll. Recovery is training."},
+  {name:"Friday",    type:"lift",  title:"Full body B",           detail:"Deadlift, incline press, pull-ups, lunges, face pulls — progressive overload."},
+  {name:"Saturday",  type:"run",   title:"Tempo run",      detail:"Garmin coach session. Push the pace or build aerobic base."},
+  {name:"Sunday",    type:"run",  title:"Long run",       detail:"Light walk, stretch, mobility. Refuel and reset for the week ahead."}
 ];
 
-const EMJ={run:"🏃",lift:"🏋️",hyrox:"⚡",rest:"🌙",race:"🏅"};
-const IC={run:"wi-run",lift:"wi-lift",hyrox:"wi-hyrox",rest:"wi-rest",race:"wi-run"};
-const BC={run:"wb-run",lift:"wb-lift",hyrox:"wb-hyrox",rest:"wb-rest",race:"wb-race"};
-const BL={run:"Running",lift:"Lifting",hyrox:"Hyrox",rest:"Rest",race:"Race Day"};
-const BCOL={run:"background:#e3f2fd;color:#1976d2",lift:"background:#e8f5e9;color:#388e3c",hyrox:"background:#fbe9e7;color:#e64a19",rest:"background:#f5f5f5;color:#757575",race:"background:#e3f2fd;color:#1976d2"};
-const DAYS_FULL=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-const DAYS_S=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const EMJ  = {run:"🏃",lift:"🏋️",hyrox:"⚡",rest:"🌙",race:"🏅"};
+const IC   = {run:"wi-run",lift:"wi-lift",hyrox:"wi-hyrox",rest:"wi-rest",race:"wi-run"};
+const BC   = {run:"wb-run",lift:"wb-lift",hyrox:"wb-hyrox",rest:"wb-rest",race:"wb-race"};
+const BL   = {run:"Running",lift:"Lifting",hyrox:"Hyrox",rest:"Rest",race:"Race Day"};
+const BCOL = {run:"background:#e3f2fd;color:#1976d2",lift:"background:#e8f5e9;color:#388e3c",hyrox:"background:#fbe9e7;color:#e64a19",rest:"background:#f5f5f5;color:#757575",race:"background:#e3f2fd;color:#1976d2"};
+const DAYS_FULL = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const DAYS_S    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-const KEY="ahmedtrains_v4";
-let S={done:{},activeWeek:0,order:{}};
-try{const s=localStorage.getItem(KEY);if(s)S=JSON.parse(s);}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+// ── State ──
+const KEY = "ahmedtrains_v10";
+let S = {done:{}, order:[0,1,2,3,4,5,6]};
+try { const s=localStorage.getItem(KEY); if(s) S=JSON.parse(s); } catch(e){}
+if(!S.order || S.order.length!==7) S.order=[0,1,2,3,4,5,6];
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
 
 let bodyLogs=[];
 try{const b=localStorage.getItem("ahmedtrains_body");if(b)bodyLogs=JSON.parse(b);}catch(e){}
 function saveBody(){try{localStorage.setItem("ahmedtrains_body",JSON.stringify(bodyLogs));}catch(e){}}
 
-// ─────────────────────────────────────────────
-// AUTO WEEK DETECTION — resets every Monday
-// Plan starts: 5 May 2025 (Monday of Week 1)
-// ─────────────────────────────────────────────
-const PLAN_START = new Date(2025, 4, 5); // May 5 2025
-
-function getCurrentWeek(){
+// ── Monday reset — wipe done state at the start of each new week ──
+(function weekReset(){
   const today = new Date();
-  const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const diffDays = Math.floor((todayMid - PLAN_START) / 86400000);
-  if(diffDays < 0) return 0;           // before plan starts → show week 1
-  const week = Math.floor(diffDays / 7);
-  return Math.min(week, 3);            // cap at week 4 (index 3)
-}
+  const mon = new Date(today);
+  mon.setDate(today.getDate() - ((today.getDay()+6)%7)); // Monday of this week
+  const monStr = mon.toISOString().split("T")[0];
+  const stored = localStorage.getItem("ahmedtrains_weekOf");
+  if(stored !== monStr){
+    S.done = {};
+    save();
+    localStorage.setItem("ahmedtrains_weekOf", monStr);
+  }
+})();
 
-function getWeekDates(weekIdx){
-  const mon = new Date(PLAN_START);
-  mon.setDate(mon.getDate() + weekIdx * 7);
-  const sun = new Date(mon);
-  sun.setDate(sun.getDate() + 6);
-  const fmt = d => d.toLocaleDateString("en-GB", {day:"numeric", month:"short"});
-  return fmt(mon) + " – " + fmt(sun);
-}
-
-
-
-// ─────────────────────────────────────────────
-// GREETING
-// ─────────────────────────────────────────────
-
-
-// ─────────────────────────────────────────────
-// STATS — simplified (cards removed)
-// ─────────────────────────────────────────────
-function updateStats(){
-  // No stat cards on home screen anymore — kept for log screen compatibility
-}
-
-// ─────────────────────────────────────────────
-// WEEK TABS — replaced by auto-detection
-// ─────────────────────────────────────────────
-function renderTabs(){
-  // activeWeek set automatically from current date on load
-}
-
-// ─────────────────────────────────────────────
-// ORDER HELPERS
-// ─────────────────────────────────────────────
-function getOrder(){
-  const k="w"+S.activeWeek;
-  if(!S.order[k]||S.order[k].length!==7)S.order[k]=[0,1,2,3,4,5,6];
-  return S.order[k];
-}
-
-// ─────────────────────────────────────────────
-// SCHEDULE (two-column + drag)
-// ─────────────────────────────────────────────
+// ── Schedule render ──
 function renderSched(){
-  const wk=WEEKS[S.activeWeek];
-  const order=getOrder();
-  const dcol=document.getElementById("day-col");
-  const wcol=document.getElementById("wkcol");
-  dcol.innerHTML="";wcol.innerHTML="";
+  const dcol = document.getElementById("day-col");
+  const wcol  = document.getElementById("wkcol");
+  dcol.innerHTML = "";
+  wcol.innerHTML  = "";
 
   DAYS_FULL.forEach((d,i)=>{
-    const c=document.createElement("div");
-    c.className="dlc";
-    c.innerHTML=`<div class="dln">${d}</div><div class="dls">${DAYS_S[i]}</div>`;
+    const c = document.createElement("div");
+    c.className = "dlc";
+    c.innerHTML = `<div class="dln">${DAYS_S[i]}</div>`;
     dcol.appendChild(c);
   });
 
-  order.forEach((dayIdx,slot)=>{
-    const d=wk.days[dayIdx];
-    const isDone=!!S.done[S.activeWeek+"-"+dayIdx];
-    const card=document.createElement("div");
-    card.className="wcard";
-    card.dataset.slot=slot;
-    card.dataset.dayIdx=dayIdx;
-    card.draggable=true;
-    card.innerHTML=`
+  S.order.forEach((dayIdx, slot)=>{
+    const d = WEEK[dayIdx];
+    const isDone = !!S.done[dayIdx];
+    const card = document.createElement("div");
+    card.className = "wcard";
+    card.dataset.slot = slot;
+    card.dataset.dayIdx = dayIdx;
+    card.draggable = false;
+    card.innerHTML = `
       <div class="wi ${IC[d.type]}">${EMJ[d.type]||"🌙"}</div>
       <div class="winfo">
         <div class="wtitle" style="${isDone?"text-decoration:line-through;opacity:.4":""}">${d.title}</div>
         <span class="wbadge ${BC[d.type]}">${BL[d.type]}</span>
       </div>
-      <button class="cbtn ${isDone?"chk":""}" data-w="${S.activeWeek}" data-d="${dayIdx}" onclick="toggleDone(event,this)">
+      <button class="cbtn ${isDone?"chk":""}" data-di="${dayIdx}" onclick="toggleDone(event,this)">
         <svg width="11" height="9" viewBox="0 0 11 9" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4.5 4,7.5 10,1"/></svg>
       </button>
       <div class="dhandle"><span></span><span></span><span></span></div>`;
 
     card.addEventListener("click",function(e){
-      if(e.target.closest(".cbtn")) return;
-      openSheet(d,DAYS_FULL[slot]);
+      if(e.target.closest(".cbtn")||e.target.closest(".dhandle")) return;
+      openSheet(d, DAYS_FULL[slot]);
     });
-    card.addEventListener("dragstart",dStart);
-    card.addEventListener("dragover",dOver);
-    card.addEventListener("dragleave",dLeave);
-    card.addEventListener("drop",dDrop);
-    card.addEventListener("dragend",dEnd);
-    card.addEventListener("touchstart",tStart,{passive:true});
-    card.addEventListener("touchmove",tMove,{passive:false});
-    card.addEventListener("touchend",tEnd);
+    card.addEventListener("dragover",  dOver);
+    card.addEventListener("dragleave", dLeave);
+    card.addEventListener("drop",      dDrop);
+
+    // Only handle triggers drag
+    const handle = card.querySelector(".dhandle");
+    handle.addEventListener("mousedown", function(){
+      card.draggable = true;
+    });
+    card.addEventListener("dragstart", dStart);
+    card.addEventListener("dragend",   function(e){ dEnd.call(this,e); card.draggable=false; });
+    handle.addEventListener("touchstart",tStart,{passive:true});
+    handle.addEventListener("touchmove", tMove, {passive:false});
+    handle.addEventListener("touchend",  tEnd);
     wcol.appendChild(card);
   });
 }
 
-function toggleDone(e,btn){
+function toggleDone(e, btn){
   e.stopPropagation();
-  const k=btn.dataset.w+"-"+btn.dataset.d;
-  if(S.done[k])delete S.done[k];else S.done[k]=true;
-  save();renderSched();updateStats();
+  const di = +btn.dataset.di;
+  if(S.done[di]) delete S.done[di]; else S.done[di]=true;
+  save(); renderSched();
 }
 
-// ─────────────────────────────────────────────
-// DRAG — mouse
-// ─────────────────────────────────────────────
+// ── Drag — mouse ──
 let dragSlot=null;
-function dStart(){dragSlot=+this.dataset.slot;this.classList.add("dragging");}
-function dOver(e){e.preventDefault();this.classList.add("drag-over");}
-function dLeave(){this.classList.remove("drag-over");}
-function dEnd(){this.classList.remove("dragging");document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));}
+function dStart(){ dragSlot=+this.dataset.slot; this.classList.add("dragging"); }
+function dOver(e){ e.preventDefault(); this.classList.add("drag-over"); }
+function dLeave(){ this.classList.remove("drag-over"); }
+function dEnd(){ this.classList.remove("dragging"); document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over")); }
 function dDrop(e){
-  e.preventDefault();this.classList.remove("drag-over");
-  const ts=+this.dataset.slot;
-  if(dragSlot===null||dragSlot===ts)return;
-  const o=getOrder();[o[dragSlot],o[ts]]=[o[ts],o[dragSlot]];
-  S.order["w"+S.activeWeek]=o;save();renderSched();
+  e.preventDefault(); this.classList.remove("drag-over");
+  const ts = +this.dataset.slot;
+  if(dragSlot===null||dragSlot===ts) return;
+  [S.order[dragSlot],S.order[ts]]=[S.order[ts],S.order[dragSlot]];
+  save(); renderSched();
 }
 
-// ─────────────────────────────────────────────
-// DRAG — touch
-// ─────────────────────────────────────────────
+// ── Drag — touch ──
 let tCard=null,tSlot=null,ghost=null;
 function tStart(){
-  tCard=this;tSlot=+this.dataset.slot;
+  tCard=this; tSlot=+this.dataset.slot;
   const r=this.getBoundingClientRect();
   ghost=this.cloneNode(true);
   ghost.style.cssText=`position:fixed;z-index:999;opacity:.65;pointer-events:none;width:${r.width}px;left:${r.left}px;top:${r.top}px;border-radius:12px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.15)`;
@@ -511,17 +500,17 @@ function tStart(){
   this.style.opacity=".3";
 }
 function tMove(e){
-  if(!tCard)return;
+  if(!tCard) return;
   e.preventDefault();
   const t=e.touches[0];
   ghost.style.top=(t.clientY-34)+"px";
   const el=document.elementFromPoint(t.clientX,t.clientY);
   const target=el&&el.closest(".wcard");
   document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
-  if(target&&target!==tCard)target.classList.add("drag-over");
+  if(target&&target!==tCard) target.classList.add("drag-over");
 }
 function tEnd(e){
-  if(!tCard)return;
+  if(!tCard) return;
   if(ghost){ghost.remove();ghost=null;}
   tCard.style.opacity="";
   const t=e.changedTouches[0];
@@ -530,16 +519,14 @@ function tEnd(e){
   document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
   if(target&&target!==tCard){
     const ts=+target.dataset.slot;
-    const o=getOrder();[o[tSlot],o[ts]]=[o[ts],o[tSlot]];
-    S.order["w"+S.activeWeek]=o;save();renderSched();
+    [S.order[tSlot],S.order[ts]]=[S.order[ts],S.order[tSlot]];
+    save(); renderSched();
   }
-  tCard=null;tSlot=null;
+  tCard=null; tSlot=null;
 }
 
-// ─────────────────────────────────────────────
-// DETAIL SHEET
-// ─────────────────────────────────────────────
-function openSheet(d,dayName){
+// ── Detail sheet ──
+function openSheet(d, dayName){
   const badge=document.getElementById("s-badge");
   badge.textContent=BL[d.type];
   badge.style.cssText=BCOL[d.type]+";font-size:10px;padding:3px 9px;border-radius:100px;font-weight:500";
@@ -554,21 +541,16 @@ function closeSheet(){
   document.getElementById("overlay").classList.remove("on");
 }
 
-
-// ─────────────────────────────────────────────
-// SCREEN NAV
-// ─────────────────────────────────────────────
+// ── Screen nav ──
 function go(name){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nbtn").forEach(b=>b.classList.remove("active"));
   document.getElementById("screen-"+name).classList.add("active");
   document.getElementById("nav-"+name).classList.add("active");
-  if(name==="body")renderBodyScreen();
+  if(name==="body") renderBodyScreen();
 }
 
-// ─────────────────────────────────────────────
-// BODY TRACKING
-// ─────────────────────────────────────────────
+// ── Body tracking ──
 let chartMetric="weight";
 function submitBody(){
   const week=parseInt(document.getElementById("inp-week").value);
@@ -583,9 +565,9 @@ function submitBody(){
   saveBody();
   document.getElementById("inp-weight").value="";
   document.getElementById("inp-waist").value="";
-  renderBodyScreen();updateStats();
+  renderBodyScreen();
 }
-function delBody(week){bodyLogs=bodyLogs.filter(l=>l.week!==week);saveBody();renderBodyScreen();updateStats();}
+function delBody(week){bodyLogs=bodyLogs.filter(l=>l.week!==week);saveBody();renderBodyScreen();}
 function switchChart(m){
   chartMetric=m;
   document.querySelectorAll(".ctab").forEach(t=>t.classList.remove("active"));
@@ -677,9 +659,7 @@ function renderBodyScreen(){
     </div>`).join("");
 }
 
-// ─────────────────────────────────────────────
-// WORKOUT TAB SWITCHER
-// ─────────────────────────────────────────────
+// ── Workout tab switcher ──
 function switchWorkout(tab){
   document.getElementById("wk-a").style.display = tab==="a" ? "block" : "none";
   document.getElementById("wk-b").style.display = tab==="b" ? "block" : "none";
@@ -687,22 +667,50 @@ function switchWorkout(tab){
   document.getElementById("wktab-"+tab).classList.add("active");
 }
 
-// ─────────────────────────────────────────────
-// INIT — auto-detect current week on load
-// ─────────────────────────────────────────────
-S.activeWeek = getCurrentWeek();
-renderSched();
+// ── 6RM tracking ──
+let rmData = {};
+try{ const r=localStorage.getItem("ahmedtrains_rm"); if(r) rmData=JSON.parse(r); }catch(e){}
+function saveRMStore(){ try{localStorage.setItem("ahmedtrains_rm",JSON.stringify(rmData));}catch(e){} }
 
-// Reset check-ins every Monday
-(function checkWeekReset(){
-  const stored = localStorage.getItem("ahmedtrains_lastWeek");
-  const curWeek = getCurrentWeek();
-  if(stored !== null && parseInt(stored) !== curWeek){
-    for(let d=0;d<7;d++) delete S.done[curWeek+"-"+d];
-    save();
+function toggleEx(card, key){
+  card.classList.toggle("open");
+  if(card.classList.contains("open")){
+    const inp = document.getElementById("inp-"+key);
+    if(rmData[key]) inp.value = rmData[key];
+    inp.focus();
   }
-  localStorage.setItem("ahmedtrains_lastWeek", curWeek);
-})();
+}
+
+function saveRM(e, key){
+  e.stopPropagation();
+  const inp = document.getElementById("inp-"+key);
+  const val = parseFloat(inp.value);
+  if(isNaN(val)||val<=0){ alert("Enter a valid weight."); return; }
+  rmData[key] = val;
+  saveRMStore();
+  refreshRM(key);
+  // close card
+  inp.closest(".mu-card").classList.remove("open");
+}
+
+function refreshRM(key){
+  const el = document.getElementById("rm-"+key);
+  if(!el) return;
+  if(rmData[key]){
+    el.textContent = rmData[key]+"kg 6RM";
+    el.style.display = "inline-block";
+  } else {
+    el.style.display = "none";
+  }
+}
+
+function loadAllRM(){
+  Object.keys(rmData).forEach(k => refreshRM(k));
+}
+
+// ── Init ──
+renderSched();
+loadAllRM();
 </script>
 <script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js");}</script>
 </body>
