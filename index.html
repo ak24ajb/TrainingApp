@@ -376,8 +376,8 @@ const WEEK = [
   {name:"Wednesday", type:"hyrox", title:"Hyrox conditioning",    detail:"Row 1000m + 4 rounds: 20 wall balls · 20 burpees · 20 KB swings."},
   {name:"Thursday",  type:"rest",  title:"Complete rest",         detail:"Sleep 8h. Eat your protein. Foam roll. Recovery is training."},
   {name:"Friday",    type:"lift",  title:"Full body B",           detail:"Deadlift, incline press, pull-ups, lunges, face pulls — progressive overload."},
-  {name:"Saturday",  type:"run",   title:"Tempo run",      detail:"Garmin coach session. Push the pace or build aerobic base."},
-  {name:"Sunday",    type:"run",  title:"Long run",       detail:"Light walk, stretch, mobility. Refuel and reset for the week ahead."}
+  {name:"Saturday",  type:"run",   title:"Tempo / Long run",      detail:"Garmin coach session. Push the pace or build aerobic base."},
+  {name:"Sunday",    type:"rest",  title:"Active recovery",       detail:"Light walk, stretch, mobility. Refuel and reset for the week ahead."}
 ];
 
 const EMJ  = {run:"🏃",lift:"🏋️",hyrox:"⚡",rest:"🌙",race:"🏅"};
@@ -415,26 +415,30 @@ function saveBody(){try{localStorage.setItem("ahmedtrains_body",JSON.stringify(b
 
 // ── Schedule render ──
 function renderSched(){
+  // Guard: ensure order is valid before rendering
+  if(!S.order||S.order.length!==7) S.order=[0,1,2,3,4,5,6];
+
   const dcol = document.getElementById("day-col");
   const wcol  = document.getElementById("wkcol");
   dcol.innerHTML = "";
   wcol.innerHTML  = "";
 
-  DAYS_FULL.forEach((d,i)=>{
+  DAYS_S.forEach(name=>{
     const c = document.createElement("div");
     c.className = "dlc";
-    c.innerHTML = `<div class="dln">${DAYS_S[i]}</div>`;
+    c.innerHTML = `<div class="dln">${name}</div>`;
     dcol.appendChild(c);
   });
 
   S.order.forEach((dayIdx, slot)=>{
+    if(dayIdx<0||dayIdx>=WEEK.length) return; // skip corrupted entries
     const d = WEEK[dayIdx];
     const isDone = !!S.done[dayIdx];
     const card = document.createElement("div");
     card.className = "wcard";
-    card.dataset.slot = slot;
-    card.dataset.dayIdx = dayIdx;
-    card.draggable = false;
+    card.dataset.slot = String(slot);
+    card.dataset.dayIdx = String(dayIdx);
+
     card.innerHTML = `
       <div class="wi ${IC[d.type]}">${EMJ[d.type]||"🌙"}</div>
       <div class="winfo">
@@ -446,24 +450,86 @@ function renderSched(){
       </button>
       <div class="dhandle"><span></span><span></span><span></span></div>`;
 
-    card.addEventListener("click",function(e){
+    // Tap card body → open sheet (not on check or handle)
+    card.addEventListener("click", function(e){
       if(e.target.closest(".cbtn")||e.target.closest(".dhandle")) return;
       openSheet(d, DAYS_FULL[slot]);
     });
-    card.addEventListener("dragover",  dOver);
-    card.addEventListener("dragleave", dLeave);
-    card.addEventListener("drop",      dDrop);
 
-    // Only handle triggers drag
-    const handle = card.querySelector(".dhandle");
-    handle.addEventListener("mousedown", function(){
-      card.draggable = true;
+    // Drag targets on every card
+    card.addEventListener("dragover",  function(e){ e.preventDefault(); this.classList.add("drag-over"); });
+    card.addEventListener("dragleave", function(){ this.classList.remove("drag-over"); });
+    card.addEventListener("drop",      function(e){
+      e.preventDefault();
+      this.classList.remove("drag-over");
+      const ts = parseInt(this.dataset.slot, 10);
+      if(dragSlot===null||isNaN(ts)||dragSlot===ts) return;
+      const o = [...S.order];
+      [o[dragSlot], o[ts]] = [o[ts], o[dragSlot]];
+      S.order = o;
+      dragSlot = null;
+      save(); renderSched();
     });
-    card.addEventListener("dragstart", dStart);
-    card.addEventListener("dragend",   function(e){ dEnd.call(this,e); card.draggable=false; });
-    handle.addEventListener("touchstart",tStart,{passive:true});
-    handle.addEventListener("touchmove", tMove, {passive:false});
-    handle.addEventListener("touchend",  tEnd);
+
+    // Handle-only mouse drag
+    const handle = card.querySelector(".dhandle");
+    handle.addEventListener("mousedown", function(){ card.draggable = true; });
+    document.addEventListener("mouseup", function(){ card.draggable = false; }, {once:false});
+    card.addEventListener("dragstart", function(){
+      dragSlot = parseInt(this.dataset.slot, 10);
+      this.classList.add("dragging");
+    });
+    card.addEventListener("dragend", function(){
+      this.classList.remove("dragging");
+      this.draggable = false;
+      dragSlot = null;
+      document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
+    });
+
+    // Handle-only touch drag — capture the CARD, not the handle
+    handle.addEventListener("touchstart", function(e){
+      const parentCard = this.closest(".wcard");
+      tCard = parentCard;
+      tSlot = parseInt(parentCard.dataset.slot, 10);
+      const r = parentCard.getBoundingClientRect();
+      ghost = parentCard.cloneNode(true);
+      ghost.style.cssText = `position:fixed;z-index:999;opacity:.65;pointer-events:none;width:${r.width}px;left:${r.left}px;top:${r.top}px;border-radius:12px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.15)`;
+      document.body.appendChild(ghost);
+      parentCard.style.opacity = ".3";
+    }, {passive:true});
+
+    handle.addEventListener("touchmove", function(e){
+      if(!tCard) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      ghost.style.top = (t.clientY - 34) + "px";
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const target = el && el.closest(".wcard");
+      document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
+      if(target && target !== tCard) target.classList.add("drag-over");
+    }, {passive:false});
+
+    handle.addEventListener("touchend", function(e){
+      if(!tCard) return;
+      if(ghost){ ghost.remove(); ghost = null; }
+      tCard.style.opacity = "";
+      const t = e.changedTouches[0];
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const target = el && el.closest(".wcard");
+      document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
+      if(target && target !== tCard){
+        const ts = parseInt(target.dataset.slot, 10);
+        if(!isNaN(tSlot) && !isNaN(ts) && tSlot !== ts){
+          const o = [...S.order];
+          [o[tSlot], o[ts]] = [o[ts], o[tSlot]];
+          S.order = o;
+          save();
+        }
+      }
+      tCard = null; tSlot = null;
+      renderSched();
+    });
+
     wcol.appendChild(card);
   });
 }
@@ -475,55 +541,8 @@ function toggleDone(e, btn){
   save(); renderSched();
 }
 
-// ── Drag — mouse ──
-let dragSlot=null;
-function dStart(){ dragSlot=+this.dataset.slot; this.classList.add("dragging"); }
-function dOver(e){ e.preventDefault(); this.classList.add("drag-over"); }
-function dLeave(){ this.classList.remove("drag-over"); }
-function dEnd(){ this.classList.remove("dragging"); document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over")); }
-function dDrop(e){
-  e.preventDefault(); this.classList.remove("drag-over");
-  const ts = +this.dataset.slot;
-  if(dragSlot===null||dragSlot===ts) return;
-  [S.order[dragSlot],S.order[ts]]=[S.order[ts],S.order[dragSlot]];
-  save(); renderSched();
-}
-
-// ── Drag — touch ──
-let tCard=null,tSlot=null,ghost=null;
-function tStart(){
-  tCard=this; tSlot=+this.dataset.slot;
-  const r=this.getBoundingClientRect();
-  ghost=this.cloneNode(true);
-  ghost.style.cssText=`position:fixed;z-index:999;opacity:.65;pointer-events:none;width:${r.width}px;left:${r.left}px;top:${r.top}px;border-radius:12px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.15)`;
-  document.body.appendChild(ghost);
-  this.style.opacity=".3";
-}
-function tMove(e){
-  if(!tCard) return;
-  e.preventDefault();
-  const t=e.touches[0];
-  ghost.style.top=(t.clientY-34)+"px";
-  const el=document.elementFromPoint(t.clientX,t.clientY);
-  const target=el&&el.closest(".wcard");
-  document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
-  if(target&&target!==tCard) target.classList.add("drag-over");
-}
-function tEnd(e){
-  if(!tCard) return;
-  if(ghost){ghost.remove();ghost=null;}
-  tCard.style.opacity="";
-  const t=e.changedTouches[0];
-  const el=document.elementFromPoint(t.clientX,t.clientY);
-  const target=el&&el.closest(".wcard");
-  document.querySelectorAll(".wcard").forEach(c=>c.classList.remove("drag-over"));
-  if(target&&target!==tCard){
-    const ts=+target.dataset.slot;
-    [S.order[tSlot],S.order[ts]]=[S.order[ts],S.order[tSlot]];
-    save(); renderSched();
-  }
-  tCard=null; tSlot=null;
-}
+// ── Drag state ──
+let dragSlot=null, tCard=null, tSlot=null, ghost=null;
 
 // ── Detail sheet ──
 function openSheet(d, dayName){
